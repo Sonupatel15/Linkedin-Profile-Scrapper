@@ -1,64 +1,3 @@
-# import datetime
-# from database.db import SessionLocal
-# from database.models import Profile
-# from services.staff_spy import StaffSpyService
-# from utils.helpers import extract_linkedin_id
-
-# STAFFSPY = StaffSpyService()
-
-# def get_profile(linkedin_url: str, freshness_days: int = 30):
-#     """
-#     Check DB first, if fresh return data.
-#     Otherwise fetch via StaffSpy, update DB, return.
-#     """
-#     db = SessionLocal()
-#     profile = db.query(Profile).filter_by(linkedin_url=linkedin_url).first()
-
-#     # Check freshness
-#     if profile:
-#         age = (datetime.datetime.now() - profile.last_updated).days
-#         if age <= freshness_days:
-#             db.close()
-#             return profile.__dict__
-
-#     # Else fetch via StaffSpy
-#     linkedin_id = extract_linkedin_id(linkedin_url)
-#     new_data = STAFFSPY.fetch_profile(linkedin_id)
-#     if not new_data:
-#         db.close()
-#         return None
-
-#     # Upsert
-#     if profile:
-#         for key in ["name","first_name","last_name","location","headline",
-#                     "company","past_company1","past_company2","school1","school2",
-#                     "skills","experiences","certifications"]:
-#             setattr(profile, key, new_data.get(key))
-#     else:
-#         profile = Profile(
-#             linkedin_url=linkedin_url,
-#             name=new_data.get("name"),
-#             first_name=new_data.get("first_name"),
-#             last_name=new_data.get("last_name"),
-#             location=new_data.get("location"),
-#             headline=new_data.get("headline"),
-#             company=new_data.get("company"),
-#             past_company1=new_data.get("past_company1"),
-#             past_company2=new_data.get("past_company2"),
-#             school1=new_data.get("school1"),
-#             school2=new_data.get("school2"),
-#             skills=new_data.get("skills"),
-#             experiences=new_data.get("experiences"),
-#             certifications=new_data.get("certifications")
-#         )
-#         db.add(profile)
-
-#     db.commit()
-#     db.refresh(profile)
-#     db.close()
-#     return profile.__dict__
-
-
 import logging
 from datetime import datetime, timezone
 from sqlalchemy.exc import SQLAlchemyError
@@ -127,3 +66,73 @@ def _to_dict(prof: Profile):
         return None
     d = {c.name: getattr(prof, c.name) for c in prof.__table__.columns}
     return d
+
+
+##########################################################################
+
+
+# import json
+# import logging
+# from sqlalchemy.exc import SQLAlchemyError
+
+# logger = logging.getLogger("StaffSpy")
+
+# def _sanitize_string(value):
+#     """Remove problematic characters from strings (like null bytes)."""
+#     if value is None:
+#         return None
+#     return str(value).replace("\u0000", "").strip()
+
+# def _sanitize_json_field(data):
+#     """Convert data to JSON string and remove null bytes."""
+#     if data is None:
+#         return None
+#     # If data is not a string, serialize to JSON
+#     if isinstance(data, (dict, list)):
+#         data_str = json.dumps(data, ensure_ascii=False)
+#     else:
+#         data_str = str(data)
+#     # Remove null bytes
+#     data_str = data_str.replace("\u0000", "")
+#     return data_str
+
+# def get_or_refresh_profile(db, newdata, freshness_days=30):
+#     """
+#     Save or update a LinkedIn profile in the database with proper sanitization.
+#     """
+#     try:
+#         from models import Profile  # Adjust import based on your project structure
+
+#         # Assume linkedin_url is unique
+#         linkedin_url = newdata.get("linkedin_url")
+#         prof = db.query(Profile).filter_by(linkedin_url=linkedin_url).first()
+#         if not prof:
+#             prof = Profile(linkedin_url=_sanitize_string(linkedin_url))
+#             db.add(prof)
+
+#         # Sanitize string fields
+#         string_fields = [
+#             "name", "first_name", "last_name", "location", "headline",
+#             "company", "past_company1", "past_company2", "school1", "school2"
+#         ]
+#         for field in string_fields:
+#             setattr(prof, field, _sanitize_string(newdata.get(field)))
+
+#         # Sanitize JSON fields
+#         json_fields = ["skills", "experiences", "certifications"]
+#         for field in json_fields:
+#             setattr(prof, field, _sanitize_json_field(newdata.get(field)))
+
+#         db.commit()
+#         logger.info(f"Profile saved/updated successfully: {linkedin_url}")
+#         return prof
+
+#     except SQLAlchemyError as e:
+#         db.rollback()
+#         logger.error(f"DB error while saving profile: {str(e)}")
+#         return None
+
+#     except Exception as e:
+#         db.rollback()
+#         logger.error(f"Unexpected error: {str(e)}")
+#         return None

@@ -1,16 +1,3 @@
-# import os
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# def get_env_variables(key: str, default=None):
-#     """Helper to fetch environment variables safely"""
-#     return os.getenv(key, default)
-
-# # Direct access if needed
-# HARVEST_API_KEY = os.getenv("HARVEST_API_KEY")
-
-####################
 import os
 from dotenv import load_dotenv
 

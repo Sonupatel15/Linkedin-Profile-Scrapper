@@ -1,21 +1,3 @@
-# from staffspy import LinkedInAccount
-
-# class StaffSpyService:
-#     def __init__(self, session_file="session.pkl"):
-#         self.account = LinkedInAccount(session_file=session_file, log_level=1)
-
-#     def fetch_profile(self, linkedin_id: str):
-#         """Fetch full LinkedIn profile using staffspy"""
-#         try:
-#             users = self.account.scrape_users(user_ids=[linkedin_id])
-#             return users.to_dict(orient="records")[0] if not users.empty else None
-#         except Exception as e:
-#             print(f"❌ StaffSpy error: {e}")
-#             return None
-
-
-###############
-
 import logging
 import pandas as pd
 from config.config import get_env

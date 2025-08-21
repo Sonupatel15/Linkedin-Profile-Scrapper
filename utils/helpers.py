@@ -1,14 +1,3 @@
-# def extract_linkedin_id(url: str) -> str:
-#     """
-#     Convert LinkedIn profile URL into ID
-#     Example: https://www.linkedin.com/in/sonupatel-a-l -> sonupatel-a-l
-#     """
-#     return url.rstrip("/").split("/")[-1]
-
-
-###################
-
-
 import ast
 
 def extract_linkedin_id(url: str) -> str:

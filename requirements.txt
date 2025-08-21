@@ -6,6 +6,7 @@ rich
 SQLAlchemy
 psycopg2-binary
 pandas
+streamlit
 
 # StaffSpy (if pip install fails, install from its repo as per its README)
 #pip install -U "staffspy[browser]"
