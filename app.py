@@ -1,62 +1,96 @@
 # app.py
 import streamlit as st
-import pandas as pd
-from main import run_scraper
-from database.db import get_all_profiles
+from datetime import datetime
+from services.harvest_api import HarvestAPI
+from services.profile_service import get_or_refresh_profile
+from config.config import get_env
 
-st.set_page_config(page_title="LinkedIn StaffSpy", layout="wide")
-st.title("🔎 LinkedIn StaffSpy")
-st.write("Search for employees of a company on LinkedIn and analyze the results.")
+# Page config
+st.set_page_config(page_title="LinkedIn Profile Scraper", layout="wide")
 
-# Sidebar Inputs
-st.sidebar.header("Search Settings")
-name = st.sidebar.text_input("Name (required)", "Satya Nadella")
-current_company = st.sidebar.text_input("Current Company")
-past_company = st.sidebar.text_input("Past Company")
-location = st.sidebar.text_input("Location")
-school = st.sidebar.text_input("School")
-page = st.sidebar.number_input("Page number", min_value=1, value=1)
-max_show = st.sidebar.slider("How many profile links?", 1, 10, 5)
-freshness_days = st.sidebar.selectbox("Freshness days", [30, 60], index=0)
+st.title("🔍 LinkedIn Profile Scraper")
 
-if st.sidebar.button("Run Scraper"):
-    with st.spinner("Scraping in progress..."):
-        try:
-            result = run_scraper(
-                name=name,
-                current_company=current_company or None,
-                past_company=past_company or None,
-                location=location or None,
-                school=school or None,
-                page=page,
-                max_show=max_show,
-                freshness_days=freshness_days,
-            )
-            if not result["profiles"]:
-                st.error("❌ No profiles found.")
-            else:
-                st.success("✅ Scraping finished!")
-                st.write("### Matching Profile Links")
-                for idx, link in enumerate(result["profiles"], start=1):
-                    st.write(f"{idx}. {link}")
+# Sidebar for inputs
+st.sidebar.header("Search Filters")
+name = st.sidebar.text_input("Enter Name (required)")
+current_company = st.sidebar.text_input("Current/Present Company (optional)")
+past_company = st.sidebar.text_input("Previous Company (optional)")
+school = st.sidebar.text_input("School (optional)")
+location = st.sidebar.text_input("Location (optional)")
 
-                if result["data"]:
-                    st.write("### Profile Data")
-                    df = pd.DataFrame([result["data"]])
-                    st.dataframe(df, use_container_width=True)
+page = st.sidebar.number_input("Page Number", min_value=1, value=1)
+max_show = st.sidebar.number_input("Max Profiles to Show", min_value=1, max_value=10, value=5)
 
-                    csv = df.to_csv(index=False).encode("utf-8")
-                    st.download_button("Download Profile CSV", csv, "profile.csv", "text/csv")
-        except Exception as e:
-            st.error(f"Error: {e}")
+default_fresh = int(get_env("FRESHNESS_DAYS", 30))
+freshness_days = st.sidebar.selectbox("Freshness Days", options=[30, 60], index=0)
 
-if st.button("Show All Saved Results from DB"):
-    profiles = get_all_profiles()
-    if profiles:
-        df = pd.DataFrame([p.to_dict() for p in profiles])
-        st.subheader("📊 Results from DB")
-        st.dataframe(df, use_container_width=True)
-        csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button("Download All CSV", csv, "profiles.csv", "text/csv")
+# Button to trigger search
+if st.sidebar.button("Search Profiles"):
+
+    if not name:
+        st.error("Name is required to search profiles.")
     else:
-        st.warning("No profiles found in the database.")
+        api = HarvestAPI()
+        with st.spinner("Fetching profiles from Harvest API..."):
+            try:
+                result = api.search_profiles(
+                    name=name,
+                    current_company=current_company or None,
+                    past_company=past_company or None,
+                    school=school or None,
+                    location=location or None,
+                    page=page,
+                )
+                elements = result.get("elements", [])
+                if not elements:
+                    st.warning("No profiles found for this query.")
+                else:
+                    # Build list of LinkedIn URLs
+                    links = []
+                    for profile in elements:
+                        link = (
+                            profile.get("url")
+                            or profile.get("linkedinUrl")
+                            or (f"https://www.linkedin.com/in/{profile.get('publicIdentifier')}"
+                                if profile.get("publicIdentifier") else None)
+                        )
+                        if link:
+                            links.append(link)
+                        if len(links) >= max_show:
+                            break
+
+                    if not links:
+                        st.warning("No valid LinkedIn profile links in results.")
+                    else:
+                        st.success(f"Found {len(links)} profiles")
+                        # Display profiles as clickable buttons
+                        selected_idx = st.radio(
+                            "Select a profile to fetch details:", list(range(1, len(links) + 1)),
+                            format_func=lambda x: links[x - 1]
+                        )
+
+                        selected_link = links[selected_idx - 1]
+
+                        st.info("Fetching profile details from StaffSpy/DB...")
+                        data = get_or_refresh_profile(selected_link, freshness_days=freshness_days)
+
+                        if not data:
+                            st.error("Could not fetch profile data.")
+                        else:
+                            st.success("✅ Profile Data Retrieved")
+                            # Display preferred fields first
+                            preferred = [
+                                "linkedin_url","name","first_name","last_name","headline","location",
+                                "company","past_company1","past_company2","school1","school2","last_updated"
+                            ]
+                            for k in preferred:
+                                if k in data and data[k]:
+                                    st.write(f"**{k.replace('_', ' ').title()}:** {data[k]}")
+
+                            # Show remaining fields
+                            for k, v in data.items():
+                                if k not in preferred and v:
+                                    st.write(f"**{k.replace('_', ' ').title()}:** {v}")
+
+            except Exception as e:
+                st.error(f"Error fetching profiles: {e}")
