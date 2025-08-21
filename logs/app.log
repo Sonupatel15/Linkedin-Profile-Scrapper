@@ -1,0 +1,6 @@
+2025-08-21 21:24:21,911 - INFO - Requesting HarvestAPI with params: {'search': 'Dilip Harish', 'page': 1, 'currentCompany': 'Flexera'}
+2025-08-21 21:24:22,978 - INFO - Search status code: 402
+2025-08-21 21:27:58,940 - INFO - Requesting HarvestAPI with params: {'search': 'Dilip Harish', 'page': 1, 'currentCompany': 'Flexera', 'location': 'Bengaluru'}
+2025-08-21 21:28:00,617 - INFO - Search status code: 200
+2025-08-21 21:28:18,616 - INFO - Requesting HarvestAPI with params: {'search': 'Dilip Harish', 'page': 1}
+2025-08-21 21:28:19,969 - INFO - Search status code: 200
