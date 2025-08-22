@@ -1,9 +1,9 @@
 import streamlit as st
-from datetime import datetime
 from services.harvest_api import HarvestAPI
 from services.profile_service import get_or_refresh_profile
 from config.config import get_env
 from services.summarizer import summarize_profile
+from utils.helpers import safe_parse_jsonish  # Use your helper here
 
 # Page config
 st.set_page_config(page_title="LinkedIn Profile Scraper", layout="wide")
@@ -23,6 +23,59 @@ max_show = st.sidebar.number_input("Max Profiles to Show", min_value=1, max_valu
 
 default_fresh = int(get_env("FRESHNESS_DAYS", 30))
 freshness_days = st.sidebar.selectbox("Freshness Days", options=[30, 60], index=0)
+
+def render_skills(skills_data):
+    skills = safe_parse_jsonish(skills_data)
+    if not skills:
+        st.write("No skills data available.")
+        return
+    for skill in skills:
+        skill_name = skill.get("name") if isinstance(skill, dict) else skill
+        endorsements = skill.get("endorsements", 0) if isinstance(skill, dict) else 0
+        passed = " ✅" if isinstance(skill, dict) and skill.get("passed_assessment") else ""
+        st.write(f"- {skill_name} ({endorsements} endorsements){passed}")
+
+def render_experiences(experiences_data):
+    experiences = safe_parse_jsonish(experiences_data)
+    if not experiences:
+        st.write("No experiences data available.")
+        return
+    for exp in experiences:
+        if not isinstance(exp, dict):
+            st.write(exp)
+            continue
+        role = exp.get("title", "N/A")
+        company = exp.get("company", "N/A")
+        duration = exp.get("duration", "N/A")
+        location = exp.get("location", "N/A")
+        start = exp.get("start_date", "N/A")
+        end = exp.get("end_date") or "Present"
+
+        st.markdown(f"""
+        **{role}** @ {company}  
+        📅 {start} → {end}  ({duration})  
+        🌍 {location}  
+        """)
+        st.markdown("---")
+
+def render_certificates(certificates_data):
+    certificates = safe_parse_jsonish(certificates_data)
+    if not certificates:
+        st.write("No certificates data available.")
+        return
+    for cert in certificates:
+        if not isinstance(cert, dict):
+            st.write(cert)
+            continue
+        title = cert.get("title", "N/A")
+        issuer = cert.get("issuer", "N/A")
+        date_issued = cert.get("date_issued", "N/A")
+        cert_link = cert.get("cert_link")
+
+        if cert_link:
+            st.markdown(f"- **[{title}]({cert_link})** — *{issuer}* ({date_issued})")
+        else:
+            st.markdown(f"- **{title}** — *{issuer}* ({date_issued})")
 
 # Button to trigger search
 if st.sidebar.button("Search Profiles"):
@@ -45,7 +98,6 @@ if st.sidebar.button("Search Profiles"):
                 if not elements:
                     st.warning("No profiles found for this query.")
                 else:
-                    # Build list of LinkedIn URLs
                     links = []
                     for profile in elements:
                         link = (
@@ -63,7 +115,7 @@ if st.sidebar.button("Search Profiles"):
                         st.warning("No valid LinkedIn profile links in results.")
                     else:
                         st.success(f"Found {len(links)} profiles")
-                        # Display profiles as clickable buttons
+
                         selected_idx = st.radio(
                             "Select a profile to fetch details:", list(range(1, len(links) + 1)),
                             format_func=lambda x: links[x - 1]
@@ -79,56 +131,35 @@ if st.sidebar.button("Search Profiles"):
                         else:
                             st.success("✅ Profile Data Retrieved")
 
-                            # Display preferred fields first
                             preferred = [
-                                "linkedin_url","name","first_name","last_name","headline","location",
-                                "company","past_company1","past_company2","school1","school2","last_updated"
+                                "linkedin_url", "name", "first_name", "last_name", "headline", "location",
+                                "company", "past_company1", "past_company2", "school1", "school2", "last_updated"
                             ]
                             for k in preferred:
                                 if k in data and data[k]:
                                     st.write(f"**{k.replace('_', ' ').title()}:** {data[k]}")
 
-                            # 👉 Skills Section
+                            # Skills Section
                             if "skills" in data and data["skills"]:
                                 with st.expander("💡 Skills", expanded=True):
-                                    try:
-                                        skills = eval(data["skills"]) if isinstance(data["skills"], str) else data["skills"]
-                                        for skill in skills:
-                                            skill_name = skill.get("name")
-                                            endorsements = skill.get("endorsements", 0)
-                                            passed = " ✅" if skill.get("passed_assessment") else ""
-                                            st.write(f"- {skill_name} ({endorsements} endorsements){passed}")
-                                    except Exception:
-                                        st.write(data["skills"])  # fallback to raw
+                                    render_skills(data["skills"])
 
-                            # 👉 Work Experience Section
+                            # Work Experience Section
                             if "experiences" in data and data["experiences"]:
                                 with st.expander("📌 Work Experience", expanded=True):
-                                    try:
-                                        experiences = eval(data["experiences"]) if isinstance(data["experiences"], str) else data["experiences"]
-                                        for exp in experiences:
-                                            role = exp.get("title")
-                                            company = exp.get("company")
-                                            duration = exp.get("duration")
-                                            location = exp.get("location")
-                                            start = exp.get("start_date")
-                                            end = exp.get("end_date") or "Present"
-                                            
-                                            st.markdown(f"""
-                                            **{role}** @ {company}  
-                                            📅 {start} → {end}  ({duration})  
-                                            🌍 {location if location else "N/A"}  
-                                            """)
-                                            st.markdown("---")
-                                    except Exception:
-                                        st.write(data["experiences"])  # fallback to raw
+                                    render_experiences(data["experiences"])
 
-                            # Show remaining fields (except skills/experiences)
+                            # Certificates Section
+                            if "certifications" in data and data["certifications"]:
+                                with st.expander("🎓 Certifications", expanded=True):
+                                    render_certificates(data["certifications"])
+
+                            # Show other fields except skills/experiences/certifications
                             for k, v in data.items():
-                                if k not in preferred and v and k not in ["skills", "experiences"]:
+                                if k not in preferred and v and k not in ["skills", "experiences", "certifications"]:
                                     st.write(f"**{k.replace('_', ' ').title()}:** {v}")
 
-                            # 📝 Summarization section
+                            # Summarization
                             st.subheader("📝 AI Summary of Profile")
                             summary = summarize_profile(data)
                             st.write(summary)

@@ -608,3 +608,46 @@ CONTEXT:  JSON data, line 1: ...ginner's Guide to Linux Kernel Development \u000
 2025-08-22 06:05:28,337 - INFO - SQLAlchemy engine created successfully.
 2025-08-22 06:05:28,818 - INFO - Environment variable 'STAFFSPY_SESSION_FILE' retrieved successfully.
 2025-08-22 06:05:29,781 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:14:34,818 - INFO - Environment variable 'DB_USER' retrieved successfully.
+2025-08-22 06:14:34,819 - INFO - Environment variable 'DB_PASS' retrieved successfully.
+2025-08-22 06:14:34,819 - INFO - Environment variable 'DB_HOST' retrieved successfully.
+2025-08-22 06:14:34,819 - INFO - Environment variable 'DB_PORT' retrieved successfully.
+2025-08-22 06:14:34,819 - INFO - Environment variable 'DB_NAME' retrieved successfully.
+2025-08-22 06:14:34,861 - INFO - SQLAlchemy engine created successfully.
+2025-08-22 06:14:35,467 - INFO - Environment variable 'STAFFSPY_SESSION_FILE' retrieved successfully.
+2025-08-22 06:14:36,339 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:22:28,324 - INFO - Environment variable 'DB_USER' retrieved successfully.
+2025-08-22 06:22:28,324 - INFO - Environment variable 'DB_PASS' retrieved successfully.
+2025-08-22 06:22:28,324 - INFO - Environment variable 'DB_HOST' retrieved successfully.
+2025-08-22 06:22:28,324 - INFO - Environment variable 'DB_PORT' retrieved successfully.
+2025-08-22 06:22:28,324 - INFO - Environment variable 'DB_NAME' retrieved successfully.
+2025-08-22 06:22:28,367 - INFO - SQLAlchemy engine created successfully.
+2025-08-22 06:22:28,989 - INFO - Environment variable 'STAFFSPY_SESSION_FILE' retrieved successfully.
+2025-08-22 06:22:29,905 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:22:57,218 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:23:02,643 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:23:05,818 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:23:05,819 - INFO - Environment variable 'HARVEST_API_KEY' retrieved successfully.
+2025-08-22 06:23:05,820 - INFO - Sending request to Harvest API with parameters: {'search': 'Hanumanthagowda (Gowda) K ', 'page': 1, 'currentCompany': 'Flexera'}
+2025-08-22 06:23:07,706 - INFO - Harvest API response status: 200
+2025-08-22 06:23:09,874 - INFO - Successfully fetched profile for LinkedIn ID: hanumanthagowda-gowda-k-478ab59b
+2025-08-22 06:23:09,891 - INFO - Profile for https://www.linkedin.com/in/hanumanthagowda-gowda-k-478ab59b refreshed and saved to DB.
+2025-08-22 06:25:34,011 - INFO - HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2025-08-22 06:25:34,043 - INFO - Profile summarized successfully.
+2025-08-22 06:33:03,366 - INFO - Environment variable 'DB_USER' retrieved successfully.
+2025-08-22 06:33:03,366 - INFO - Environment variable 'DB_PASS' retrieved successfully.
+2025-08-22 06:33:03,366 - INFO - Environment variable 'DB_HOST' retrieved successfully.
+2025-08-22 06:33:03,366 - INFO - Environment variable 'DB_PORT' retrieved successfully.
+2025-08-22 06:33:03,366 - INFO - Environment variable 'DB_NAME' retrieved successfully.
+2025-08-22 06:33:03,404 - INFO - SQLAlchemy engine created successfully.
+2025-08-22 06:33:03,989 - INFO - Environment variable 'STAFFSPY_SESSION_FILE' retrieved successfully.
+2025-08-22 06:33:04,905 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:33:18,024 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:33:22,653 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:33:25,267 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:33:25,268 - INFO - Environment variable 'HARVEST_API_KEY' retrieved successfully.
+2025-08-22 06:33:25,269 - INFO - Sending request to Harvest API with parameters: {'search': 'Hanumanthagowda (Gowda) K', 'page': 1, 'currentCompany': 'Flexera'}
+2025-08-22 06:33:33,590 - INFO - Harvest API response status: 200
+2025-08-22 06:33:33,794 - INFO - Using fresh profile from DB for: https://www.linkedin.com/in/hanumanthagowda-gowda-k-478ab59b
+2025-08-22 06:37:44,229 - INFO - HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2025-08-22 06:37:44,273 - INFO - Profile summarized successfully.
