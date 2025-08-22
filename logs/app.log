@@ -594,3 +594,17 @@ CONTEXT:  JSON data, line 1: ...ginner's Guide to Linux Kernel Development \u000
 2025-08-21 22:20:49,897 - INFO - Search status code: 200
 2025-08-21 22:25:25,897 - INFO - Requesting HarvestAPI with params: {'search': 'KVSM Sourish', 'page': 1, 'currentCompany': 'Flexera'}
 2025-08-21 22:25:27,308 - INFO - Search status code: 200
+2025-08-22 06:02:24,041 - INFO - Environment variable 'DB_USER' retrieved successfully.
+2025-08-22 06:02:24,042 - INFO - Environment variable 'DB_HOST' retrieved successfully.
+2025-08-22 06:02:24,042 - INFO - Environment variable 'DB_PORT' retrieved successfully.
+2025-08-22 06:02:24,042 - INFO - Environment variable 'DB_NAME' retrieved successfully.
+2025-08-22 06:02:24,538 - INFO - Environment variable 'STAFFSPY_SESSION_FILE' retrieved successfully.
+2025-08-22 06:02:25,522 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
+2025-08-22 06:05:28,309 - INFO - Environment variable 'DB_USER' retrieved successfully.
+2025-08-22 06:05:28,309 - INFO - Environment variable 'DB_PASS' retrieved successfully.
+2025-08-22 06:05:28,309 - INFO - Environment variable 'DB_HOST' retrieved successfully.
+2025-08-22 06:05:28,309 - INFO - Environment variable 'DB_PORT' retrieved successfully.
+2025-08-22 06:05:28,309 - INFO - Environment variable 'DB_NAME' retrieved successfully.
+2025-08-22 06:05:28,337 - INFO - SQLAlchemy engine created successfully.
+2025-08-22 06:05:28,818 - INFO - Environment variable 'STAFFSPY_SESSION_FILE' retrieved successfully.
+2025-08-22 06:05:29,781 - INFO - Environment variable 'FRESHNESS_DAYS' retrieved successfully.
