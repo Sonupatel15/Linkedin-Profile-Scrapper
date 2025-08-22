@@ -1,67 +1,96 @@
-# from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, JSON
-# from sqlalchemy.sql import func
-# from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy.orm import declarative_base
+# from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, func
+# from sqlalchemy.dialects.postgresql import JSONB
 
 # Base = declarative_base()
 
 # class Profile(Base):
 #     __tablename__ = "profiles"
 
-#     profile_id = Column(Integer, primary_key=True, index=True)
+#     profile_id   = Column(Integer, primary_key=True, index=True)
 #     linkedin_url = Column(Text, unique=True, nullable=False)
 
-#     name = Column(String(255))
+#     # Common identity fields
+#     name       = Column(String(255))
 #     first_name = Column(String(255))
-#     last_name = Column(String(255))
-#     location = Column(String(255))
-#     headline = Column(Text)
-#     company = Column(String(255))
-#     past_company1 = Column(String(255))
-#     past_company2 = Column(String(255))
-#     school1 = Column(String(255))
-#     school2 = Column(String(255))
+#     last_name  = Column(String(255))
+#     location   = Column(String(255))
+#     headline   = Column(Text)
 
-#     skills = Column(JSON)
-#     experiences = Column(JSON)
-#     certifications = Column(JSON)
+#     # Work & education summary
+#     company        = Column(String(255))    # current company
+#     past_company1  = Column(String(255))
+#     past_company2  = Column(String(255))
+#     school1        = Column(String(255))
+#     school2        = Column(String(255))
 
-#     last_updated = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+#     # Rich fields
+#     skills         = Column(JSONB)          # e.g. [{"name": "...", "endorsements": 3}, ...] or ["A","B",...]
+#     experiences    = Column(JSONB)          # list of dicts
+#     certifications = Column(JSONB)          # list of dicts
+
+#     # Freshness
+#     last_updated = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=False)
 
 
-
-##########
-
-
+import logging
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, func
 from sqlalchemy.dialects.postgresql import JSONB
 
+# === Logging Setup ===
+import os
+os.makedirs("logs", exist_ok=True)
+
+logging.basicConfig(
+    filename="logs/app.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+# === Base class for SQLAlchemy models ===
 Base = declarative_base()
 
+
 class Profile(Base):
+    """
+    SQLAlchemy model for the 'profiles' table.
+
+    Represents a user profile, such as one pulled from LinkedIn or similar services.
+    Stores identity, professional summary, education, and structured profile data.
+    """
+
     __tablename__ = "profiles"
 
-    profile_id   = Column(Integer, primary_key=True, index=True)
+    # Primary key
+    profile_id = Column(Integer, primary_key=True, index=True)
+
+    # Required LinkedIn URL (must be unique)
     linkedin_url = Column(Text, unique=True, nullable=False)
 
-    # Common identity fields
-    name       = Column(String(255))
+    # Identity fields
+    name = Column(String(255))
     first_name = Column(String(255))
-    last_name  = Column(String(255))
-    location   = Column(String(255))
-    headline   = Column(Text)
+    last_name = Column(String(255))
+    location = Column(String(255))
+    headline = Column(Text)
 
-    # Work & education summary
-    company        = Column(String(255))    # current company
-    past_company1  = Column(String(255))
-    past_company2  = Column(String(255))
-    school1        = Column(String(255))
-    school2        = Column(String(255))
+    # Work and education
+    company = Column(String(255))         # Current company
+    past_company1 = Column(String(255))   # Past company 1
+    past_company2 = Column(String(255))   # Past company 2
+    school1 = Column(String(255))         # School 1
+    school2 = Column(String(255))         # School 2
 
-    # Rich fields
-    skills         = Column(JSONB)          # e.g. [{"name": "...", "endorsements": 3}, ...] or ["A","B",...]
-    experiences    = Column(JSONB)          # list of dicts
-    certifications = Column(JSONB)          # list of dicts
+    # Rich structured fields (stored as JSONB)
+    skills = Column(JSONB)                # e.g., [{"name": "Python", "endorsements": 3}]
+    experiences = Column(JSONB)           # e.g., list of experience objects
+    certifications = Column(JSONB)        # e.g., list of certification objects
 
-    # Freshness
-    last_updated = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=False)
+    # Timestamp of last update (auto-updated on row change)
+    last_updated = Column(
+        TIMESTAMP,
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
