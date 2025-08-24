@@ -1,167 +1,173 @@
-# Linkedin-Profile-Scrapper
+# LinkedIn Profile Scraper & Analyzer
 
-This project is a **LinkedIn automation tool** that interacts with LinkedIn accounts using `staffspy`. It allows you to **fetch and refresh profiles, perform staff analysis, and display information via a frontend** built with Streamlit.
-
-This README will guide you **step-by-step**, even if you’re new to Python or development.
+This is an advanced Streamlit application designed to search, fetch, analyze, and summarize LinkedIn profiles. It offers multiple search methods, including by name with filters, direct URL, and bulk processing from a CSV file. The app leverages `staffspy` for data scraping and an AI service for intelligent profile summarization.
 
 ---
 
-## 🧩 Project Overview
+## ✨ Key Features
 
-**High-Level Flow:**
+-   **Search by Name**: Find profiles using a name and optional filters like current company, past company, school, and location.
+-   **Search by Profile URL**: Directly fetch and display data for a specific LinkedIn profile URL.
+-   **Bulk Search via CSV**: Upload a CSV file with a 'url' column to fetch and process multiple profiles at once.
+-   **Detailed Profile View**: Renders structured information for skills, work experience, and certifications.
+-   **AI-Powered Summaries**: Automatically generates a concise summary of the candidate's profile using an AI model.
+-   **Smart Caching**: Avoids re-fetching recent data by using a "freshness" setting, saving time and reducing risk.
+
+---
+
+## 🏗️ Project Architecture
+
+The application follows a service-oriented architecture where the Streamlit UI interacts with a set of backend services to handle API calls, data processing, and caching.
 
 ```mermaid
-flowchart LR
-    A[User opens Streamlit app] --> B[App imports services]
-    B --> C[Profile Service] --> D[LinkedInAccount via StaffSpy]
-    D --> E[Fetch or Refresh Profile Data]
-    B --> F[StaffSpy Service] --> D
-    E --> G[Display Data in Frontend]
+flowchart TD
+    subgraph "User Interface"
+        A[Streamlit App]
+    end
+
+    subgraph "Search Methods"
+        B[Search by Name]
+        C[Search by ID/URL]
+        D[Search by CSV]
+    end
+
+    subgraph "Backend Services"
+        E[Profile Service (Single Fetch & Cache)]
+        F[Bulk Service (CSV Processing)]
+        G[Harvest API Service (Name Search)]
+        H[Summarizer Service (AI Summary)]
+        I[StaffSpy Wrapper]
+    end
+
+    subgraph "External Systems & Data"
+        J[LinkedIn]
+        K[Database / Cache]
+        L[AI Model API]
+    end
+
+    A --> B
+    A --> C
+    A --> D
+
+    B --> G --> I
+    C --> E
+    D --> F --> E
+
+    E --> I
+    I --> J
+    E <--> K
+    E --> H --> L
+
+    H --> A
+    E --> A
+    F --> A
 ```
-
-**Explanation of Flow:**
-
-- **User opens app** → Streamlit frontend loads.
-- **App imports backend services** → profile service and staff spy service.
-- **Profile Service** → manages LinkedIn profile fetch/refresh logic.
-- **StaffSpy Service** → interacts with LinkedIn accounts using the `staffspy` package.
-- **Data returned** → Streamlit frontend displays profile data and analytics.
 
 ---
 
 ## ⚙️ Requirements
 
-- Python 3.10+
-- macOS, Windows, or Linux
-- Internet connection
+-   Python 3.10+
+-   macOS, Windows, or Linux
+-   An active LinkedIn account
+-   API keys for any external services used (e.g., OpenAI for summarization).
 
 ---
 
 ## 🛠️ Installation Guide
 
-### 1\. Install Python
+### 1. Clone the Repository
 
-Check if Python is installed:
+First, get the project files on your local machine.
+```bash
+git clone <your-repository-url>
+cd <repository-folder>
+```
+
+### 2. Create a Virtual Environment (Recommended)
+
+Create and activate a virtual environment to keep dependencies isolated.
 
 ```bash
-python3 --version
+# Create the environment
+python3 -m venv venv
+
+# Activate it
+# macOS/Linux:
+source venv/bin/activate
+# Windows:
+.\venv\Scripts\activate
 ```
 
-If not, download from [Python.org](https://www.python.org/).
+### 3. Install Required Packages
 
-### 2\. Create a Virtual Environment (Recommended)
+Install all the necessary Python libraries with a single command.
 
 ```bash
-python3 -m venv test
+pip install streamlit pandas requests python-dotenv sqlalchemy psycopg2-binary staffspy
 ```
+*Note: You may also need to install a library for the AI summarizer, such as `openai`.*
 
-Activate it:
+### 4. Set Up Environment Variables
 
-**macOS/Linux:**
+Create a `.env` file in the root directory of your project. This file will store your sensitive credentials securely.
 
-```bash
-source test/bin/activate
+```env
+# LinkedIn Credentials used by StaffSpy
+LINKEDIN_USERNAME="your_linkedin_email@example.com"
+LINKEDIN_PASSWORD="your_linkedin_password"
+
+# API Key for the AI Summarizer Service (e.g., OpenAI)
+OPENAI_API_KEY="sk-..."
+
+# Add any other API keys or database URLs if required
+# DATABASE_URL="..."
 ```
-
-**Windows:**
-
-```bash
-.\test\Scripts\activate
-```
-
-### 3\. Install Required Packages
-
-Install main dependencies:
-
-```bash
-pip install streamlit pandas requests python-dotenv sqlalchemy psycopg2-binary
-```
-
-Install `StaffSpy` (the LinkedIn automation package):
-
-```bash
-pip install staffspy
-```
-
-⚠️ Make sure you install `staffspy` in the **same environment** you’ll run Streamlit from.
-
-### 4\. Set Up Environment Variables
-
-Create a `.env` file in your project folder with:
-
-```
-LINKEDIN_USERNAME=your_username
-LINKEDIN_PASSWORD=your_password
-```
-
-This is used by `staffspy` to login to LinkedIn securely.
-
-### 5\. Run the App
-
-Run Streamlit with the correct environment:
-
-```bash
-python -m streamlit run app.py
-```
-
-Open the URL printed in your terminal (usually `http://localhost:8501`) to see the frontend.
 
 ---
 
-## 🖥️ How It Works
+## 🚀 How to Run the App
 
-- **Frontend (Streamlit)** → User interface to fetch or refresh LinkedIn profiles.
-- **Backend services** → Python code that calls StaffSpy to get profile and staff data.
-- **Data is displayed** dynamically on the web interface.
+With your environment activated and `.env` file configured, run the following command in your terminal:
+
+```bash
+streamlit run app.py
+```
+
+Navigate to the local URL displayed in your terminal (usually `http://localhost:8501`) to start using the application.
 
 ---
 
-## 🔄 Typical Workflow
+## 🖥️ App Workflow
 
-1.  Open Streamlit app.
-2.  Click `Fetch Profile`.
-3.  App uses `StaffSpy` to log in and fetch LinkedIn data.
-4.  Data is stored or updated.
-5.  Dashboard shows profile analytics.
+The application provides three distinct methods for finding and analyzing profiles:
+
+1.  **Search by Name**:
+    -   Select the "Search by Name" option.
+    -   Enter the full name of the person you are looking for.
+    -   Optionally, add filters like company, school, or location to narrow the results.
+    -   Click "Search Profiles" to get a list of potential matches.
+    -   Select a profile from the list to fetch and display its full details and AI summary.
+
+2.  **Search by Id (URL)**:
+    -   Select the "Search by Id" option.
+    -   Paste the full LinkedIn profile URL into the input field.
+    -   Click "Fetch Profile" to immediately retrieve, display, and summarize the data.
+
+3.  **Search by CSV**:
+    -   Select the "Search by CSV" option.
+    -   Upload a CSV file that contains a column named `url` with a list of LinkedIn profile URLs.
+    -   Click "Fetch All Profiles" to begin the bulk processing job.
+    -   The app will iterate through each URL, fetch the data, and display the profiles and their summaries one by one.
 
 ---
 
 ## ⚡ Troubleshooting
 
-| Issue                                             | Fix                                                                                                                                                          |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ModuleNotFoundError: No module named 'staffspy'` | Make sure `staffspy` is installed in the environment. Run `pip install staffspy`. Use `python -m streamlit run app.py` to ensure correct Python environment. |
-| LinkedIn login fails                              | Double-check `.env` credentials. LinkedIn may block login from an unknown IP.                                                                                |
-| Streamlit not opening                             | Check firewall or try `http://localhost:8501` manually in your browser.                                                                                      |
+| Issue                                    | Fix                                                                                                                               |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `ModuleNotFoundError`                    | Ensure all packages are installed in your active virtual environment by running `pip install -r requirements.txt` (if you have one) or the install command from Step 3. |
+| LinkedIn Login Fails                     | Double-check your `LINKEDIN_USERNAME` and `LINKEDIN_PASSWORD` in the `.env` file. LinkedIn may occasionally require a manual login or captcha to authorize a new location. |
+| AI Summary Fails or `AuthenticationError` | Verify that your `OPENAI_API_KEY` (or other AI service key) in the `.env` file is correct and has sufficient credits.               |
+| Streamlit Not Opening                    | Check your firewall settings or try navigating to `http://localhost:8501` manually in your web browser.                             |
 
----
-
-## 📊 Flowchart (Visual)
-
-```mermaid
-flowchart LR
-    User[User opens Streamlit app] --> Frontend[Streamlit Frontend]
-    Frontend --> Profile[Profile Service]
-    Profile --> Staff[StaffSpy Service]
-    Staff --> LinkedIn[LinkedInAccount]
-    LinkedIn --> ProfileData[Fetch or Refresh Data]
-    ProfileData --> Frontend
-```
-
-This shows how the **frontend interacts with the backend** and how **data flows from LinkedIn to the user interface**.
-
----
-
-## ✅ Summary
-
-1.  Install Python and create a virtual environment.
-2.  Install dependencies including `staffspy`.
-3.  Set your LinkedIn credentials in `.env`.
-4.  Run Streamlit with `python -m streamlit run app.py`.
-5.  Use the dashboard to fetch, refresh, and visualize LinkedIn profile data.
-
----
-
-```
-
-```
